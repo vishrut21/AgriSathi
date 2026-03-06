@@ -92,7 +92,7 @@ export default function Home() {
             const { latitude, longitude } = position.coords;
             try {
               const response = await axios.get(
-                `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=YOUR_API_KEY`
+                `${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`
               );
               setWeatherData(response.data);
             } catch (error) {
@@ -116,7 +116,7 @@ export default function Home() {
     const fetchDefaultWeather = async () => {
       try {
         const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?q=Delhi&units=metric&appid=YOUR_API_KEY`
+          `${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`
         );
         setWeatherData(response.data);
       } catch (error) {
