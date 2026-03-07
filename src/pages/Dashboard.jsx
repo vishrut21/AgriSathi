@@ -58,9 +58,7 @@ export default function Dashboard() {
     const fetchWeather = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8000/api/weather?city=${selectedCity}`
-        );
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/weather?city=${selectedCity}`);
         
         if (response.data.error) {
           toast.error(response.data.error);

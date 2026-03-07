@@ -91,9 +91,7 @@ export default function Home() {
           navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             try {
-              const response = await axios.get(
-                `https://api.openweathermap.org/data/2.5/weather?q=Delhi&appid=YOUR_API_KEY`
-              );
+              const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`);
               setWeatherData(response.data);
             } catch (error) {
               // Fallback to Delhi if location fails
@@ -115,9 +113,7 @@ export default function Home() {
 
     const fetchDefaultWeather = async () => {
       try {
-        const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?q=Delhi&appid=YOUR_API_KEY`
-        );
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`);
         setWeatherData(response.data);
       } catch (error) {
         console.error('Default weather fetch failed:', error);

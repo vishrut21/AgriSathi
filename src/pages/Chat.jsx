@@ -146,9 +146,7 @@ export default function Chat() {
 
     try {
       // Call your backend API which uses Gemini
-      const response = await axios.post('http://localhost:8000/api/chat', {
-        text: text
-      });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { text: text });
       
       const botReply = response.data.reply || "I couldn't process that. Please try again.";
       

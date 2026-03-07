@@ -270,7 +270,7 @@ export default function Schemes() {
   const checkEligibility = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:8000/api/check-eligibility`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/check-eligibility`, formData);
       setEligible(response.data.eligible_schemes);
       toast.success('Eligibility check completed!');
     } catch (error) {
