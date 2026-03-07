@@ -82,7 +82,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch real weather data
+  // ===== FIXED WEATHER FETCH FUNCTION =====
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -91,13 +91,17 @@ export default function Home() {
           navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             try {
-              const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`);
+              // Use lat/lon for more accurate weather
+              const response = await axios.get(
+                `${import.meta.env.VITE_API_URL}/api/weather?lat=${latitude}&lon=${longitude}`
+              );
               setWeatherData(response.data);
             } catch (error) {
-              // Fallback to Delhi if location fails
+              console.error('Location weather failed, trying Delhi:', error);
               fetchDefaultWeather();
             }
-          }, () => {
+          }, (error) => {
+            console.error('Geolocation error:', error);
             fetchDefaultWeather();
           });
         } else {
@@ -113,7 +117,9 @@ export default function Home() {
 
     const fetchDefaultWeather = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/weather?city=Delhi`
+        );
         setWeatherData(response.data);
       } catch (error) {
         console.error('Default weather fetch failed:', error);
@@ -348,12 +354,13 @@ export default function Home() {
                 {t('built_for_bharat')}
               </p>
 
-              {/* Live Weather Widget */}
-              {!weatherLoading && weatherData && (
+              {/* ===== FIXED WEATHER WIDGET WITH SAFE NULL CHECKS ===== */}
+              {!weatherLoading && weatherData ? (
                 <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl max-w-md mx-auto lg:mx-0 transform hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-semibold text-gray-500 flex items-center">
-                      <MapPin size={16} className="mr-1" /> {weatherData.name}
+                      <MapPin size={16} className="mr-1" /> 
+                      {weatherData?.name || 'Delhi'}
                     </span>
                     <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full flex items-center">
                       <Clock size={12} className="mr-1" /> {t('live')}
@@ -362,40 +369,58 @@ export default function Home() {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      {getWeatherIcon(weatherData.weather[0].main)}
+                      {weatherData?.weather?.[0]?.main ? getWeatherIcon(weatherData.weather[0].main) : <Sun className="text-yellow-500" size={32} />}
                       <div>
-                        <div className="text-4xl font-bold">{Math.round(weatherData.main.temp)}°C</div>
-                        <div className="text-gray-500 capitalize">{weatherData.weather[0].description}</div>
+                        <div className="text-4xl font-bold">
+                          {weatherData?.main?.temp ? Math.round(weatherData.main.temp) : '--'}°C
+                        </div>
+                        <div className="text-gray-500 capitalize">
+                          {weatherData?.weather?.[0]?.description || 'Loading...'}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-gray-500">{t('feels_like')}</div>
-                      <div className="font-semibold">{Math.round(weatherData.main.feels_like)}°C</div>
+                      <div className="font-semibold">
+                        {weatherData?.main?.feels_like ? Math.round(weatherData.main.feels_like) : '--'}°C
+                      </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t">
                     <div className="text-center">
                       <Droplets size={18} className="mx-auto text-blue-500 mb-1" />
-                      <div className="text-sm font-semibold">{weatherData.main.humidity}%</div>
+                      <div className="text-sm font-semibold">{weatherData?.main?.humidity || '--'}%</div>
                       <div className="text-xs text-gray-500">{t('humidity')}</div>
                     </div>
                     <div className="text-center">
                       <Wind size={18} className="mx-auto text-gray-500 mb-1" />
-                      <div className="text-sm font-semibold">{weatherData.wind.speed} m/s</div>
+                      <div className="text-sm font-semibold">{weatherData?.wind?.speed || '--'} m/s</div>
                       <div className="text-xs text-gray-500">{t('wind')}</div>
                     </div>
                     <div className="text-center">
                       <Eye size={18} className="mx-auto text-purple-500 mb-1" />
-                      <div className="text-sm font-semibold">{(weatherData.visibility / 1000).toFixed(1)}km</div>
+                      <div className="text-sm font-semibold">
+                        {weatherData?.visibility ? (weatherData.visibility / 1000).toFixed(1) : '--'}km
+                      </div>
                       <div className="text-xs text-gray-500">{t('visibility')}</div>
                     </div>
                   </div>
 
                   <div className="flex justify-between mt-4 text-xs text-gray-500">
-                    <span className="flex items-center"><Sunrise size={14} className="mr-1" /> {formatTime(weatherData.sys.sunrise)}</span>
-                    <span className="flex items-center"><Sunset size={14} className="mr-1" /> {formatTime(weatherData.sys.sunset)}</span>
+                    <span className="flex items-center">
+                      <Sunrise size={14} className="mr-1" /> 
+                      {weatherData?.sys?.sunrise ? formatTime(weatherData.sys.sunrise) : '--'}
+                    </span>
+                    <span className="flex items-center">
+                      <Sunset size={14} className="mr-1" /> 
+                      {weatherData?.sys?.sunset ? formatTime(weatherData.sys.sunset) : '--'}
+                    </span>
                   </div>
+                </div>
+              ) : (
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl max-w-md mx-auto lg:mx-0">
+                  <p className="text-center text-gray-500 animate-pulse">Loading weather data...</p>
                 </div>
               )}
 
